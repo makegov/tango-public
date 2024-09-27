@@ -2,6 +2,8 @@
 
 This repository is dedicated to tracking **issues** (bugs, feature requests, questions, and general feedback) for Tango. You can use this space to report problems, request features, or ask questions.
 
+View our [CHANGELOG](./CHANGELOG.md)
+
 ---
 
 ## Table of Contents
