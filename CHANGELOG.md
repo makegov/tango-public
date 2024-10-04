@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.4.1 (2024-10-04)
+
+### Changes
+
+- **Notices/Opportunities:** Fixes encoding for notices and opportunities
+
+### Closed issues
+
+- Resolves makegov/tango-public#1
+
 ## 1.4.0 (2024-09-27)
 
 ### Breaking changes
