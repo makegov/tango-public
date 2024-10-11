@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+[![Production Badge](https://tango.makegov.com/badges/version.svg?label=production)](https://tango.makegov.com/)
+[![Staging Badge](https://staging-tango.makegov.com/badges/version.svg?label=staging)](https://staging-tango.makegov.com/)
+
+## 1.4.5 (2024-10-11, *scheduled*)
+
+### Changes
+
+- **API:** Adds `assistance_listings` endpoint; learn more about Assistance Listing (CFDA) data [here](https://fedspendingtransparency.github.io/whitepapers/cfdaprogramnumber-title/)
+- **API:** Adds `version` endpoint
+- **API:** Fixes `business_types` detail endpoint so it properly accepts business type codes
+- **Awards:** Adds FPDS loader for both historical and contemporaneous data; currently, only newer data is being added by the FPDS loader
+- **Misc:** Version badges so y'all can know where we're at!
+
+### Breaking changes
+
+- **API:** `last_updated_time` has been renamed `last_updated` on the `notices` and `opportunities` endpoints
+
+### Closed issues
+
+- Resolves makegov/tango-public#5
+
 ## 1.4.1 (2024-10-04)
 
 ### Changes

@@ -23,6 +23,7 @@ View our [CHANGELOG](./CHANGELOG.md)
 ## Purpose
 
 This repository is publicly accessible for users to submit:
+
 - Bug reports
 - Feature requests
 - Questions
@@ -37,6 +38,7 @@ Please note that this repository does not contain any code or project files. It 
 ### Submitting a Bug Report
 
 If you've encountered a bug, please [open a new issue](https://github.com/makegov/tango-public/issues/new/choose) and provide as much information as possible. This includes:
+
 - A clear description of the bug.
 - Steps to reproduce it.
 - Expected behavior and actual behavior.
@@ -55,6 +57,7 @@ If you have a question about Tango, you can open an issue using the [Question Te
 ## Issue Templates
 
 To streamline issue submissions, we have provided several templates for common cases:
+
 - **Bug Report**
 - **Feature Request**
 - **Question**
@@ -67,7 +70,7 @@ Please select the appropriate template when submitting your issue.
 ## Contributing
 
 We encourage contributions in the form of feedback, bug reports, and feature requests. Please adhere to the following guidelines:
+
 - Be clear and concise in your descriptions.
 - Provide relevant context to help us address the issue.
 - For more significant contributions, feel free to discuss your idea in an issue first.
-
