@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [![Production Badge](https://tango.makegov.com/badges/version.svg?label=production)](https://tango.makegov.com/)
 [![Staging Badge](https://staging-tango.makegov.com/badges/version.svg?label=staging)](https://staging-tango.makegov.com/)
 
-## 1.4.5 (2024-10-11, *scheduled*)
+## 1.4.5 (2024-10-11)
 
 ### Changes
 
