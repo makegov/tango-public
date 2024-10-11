@@ -2,6 +2,9 @@
 
 This repository is dedicated to tracking **issues** (bugs, feature requests, questions, and general feedback) for Tango. You can use this space to report problems, request features, or ask questions.
 
+[![Production Badge](https://tango.makegov.com/badges/version.svg?label=production)](https://tango.makegov.com/)
+[![Staging Badge](https://staging-tango.makegov.com/badges/version.svg?label=staging)](https://staging-tango.makegov.com/)
+
 View our [CHANGELOG](./CHANGELOG.md)
 
 ---
