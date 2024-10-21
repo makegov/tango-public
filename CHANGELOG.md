@@ -6,6 +6,22 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [![Production Badge](https://tango.makegov.com/badges/version.svg?label=production)](https://tango.makegov.com/)
 [![Staging Badge](https://staging-tango.makegov.com/badges/version.svg?label=staging)](https://staging-tango.makegov.com/)
 
+## 1.4.10 (2024-10-19)
+
+### Changes
+
+- **API:** Cleans up responses for certain endpoints without values
+
+## 1.4.7 (2024-10-11)
+
+### Changes
+
+- **API:** Adds multiple keyword search with disjunctive logic for `opportunities`
+
+### Closed issues
+
+- Resolves makegov/tango-public#10
+
 ## 1.4.5 (2024-10-11)
 
 ### Changes
