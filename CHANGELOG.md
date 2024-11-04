@@ -6,6 +6,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [![Production Badge](https://tango.makegov.com/badges/version.svg?label=production)](https://tango.makegov.com/)
 [![Staging Badge](https://staging-tango.makegov.com/badges/version.svg?label=staging)](https://staging-tango.makegov.com/)
 
+## 1.5.1 (2024-11-04)
+
+### Changes
+
+- **API:** Adds ordering parameters to `contracts` and `idvs` endpoints
+- **API:** Defaults ordering for `contracts` and `idvs` endpoints to `award_date`
+
+### Closed issues
+
+- Resolves makegov/tango-public#11
+
 ## 1.4.10 (2024-10-19)
 
 ### Changes
