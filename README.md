@@ -1,6 +1,6 @@
-# Tango Issues Tracker
+# Tango API
 
-This repository is dedicated to tracking **issues** (bugs, feature requests, questions, and general feedback) for Tango. You can use this space to report problems, request features, or ask questions.
+This repository is mostly dedicated to tracking **issues** (bugs, feature requests, questions, and general feedback) for Tango. You can use this space to report problems, request features, or ask questions.
 
 [![Production Badge](https://tango.makegov.com/badges/version.svg?label=production)](https://tango.makegov.com/)
 [![Staging Badge](https://staging-tango.makegov.com/badges/version.svg?label=staging)](https://staging-tango.makegov.com/)
@@ -11,6 +11,7 @@ View our [CHANGELOG](./CHANGELOG.md)
 
 ## Table of Contents
 
+- [Tango API Usage](#tango-api-usage)
 - [Tango Issues Tracker](#tango-issues-tracker)
   - [Table of Contents](#table-of-contents)
   - [Purpose](#purpose)
@@ -23,7 +24,75 @@ View our [CHANGELOG](./CHANGELOG.md)
 
 ---
 
-## Purpose
+## Tango API Usage
+
+### API Authentication
+
+To use the [Tango API](https://tango.makegov.com/api/), you'll need to authenticate your requests using an API key. Here's how to get started:
+
+#### Getting Your API Key
+
+1. Log in to your [Tango](https://tango.makegov.com/) account
+2. Visit your [profile page](https://tango.makegov.com/accounts/profile/)
+3. Your API key will be displayed on this page:
+  <img src="assets/api-key-screensghot.png">
+
+
+#### Using Your API Key
+
+To authenticate your API requests, include your API key in the request headers using the `X-API-Key` header:
+
+  ```bash
+  curl -H "X-API-Key: your_api_key_here" https://tango.makegov.com/api/api-keys/
+  ```
+
+#### Example Requests
+
+##### Python (using `requests`)
+
+  ```python
+  import requests
+
+  headers = {
+      "X-API-Key": "your_api_key_here"
+  }
+
+  response = requests.get(
+      "https://tango.makegov.com/api/api-keys/",
+      headers=headers
+  )
+  ```
+
+##### JavaScript (using `fetch`)
+
+  ```javascript
+  const headers = {
+      "X-API-Key": "your_api_key_here"
+  };
+
+  fetch("https://tango.makegov.com/api/api-keys/", {
+      headers: headers
+  })
+      .then(response => response.json())
+      .then(data => console.log(data));
+  ```
+
+#### Security Best Practices
+
+1. Keep your API key secure and never share it publicly
+2. Don't commit your API key to version control
+3. If you suspect your key has been compromised, contact us immediately to generate a new one
+4. Use environment variables to store your API key in applications
+
+#### Need Help?
+
+If you're having trouble with API authentication, please contact our support team for assistance: [tango@makegov.com](tango@makegov.com).
+
+---
+
+## Tango Issues Tracker
+
+### Purpose
 
 This repository is publicly accessible for users to submit:
 
