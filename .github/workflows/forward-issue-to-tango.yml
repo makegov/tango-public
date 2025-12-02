@@ -1,26 +1,96 @@
-name: Forward Issues to Tango
-
 on:
   issues:
-    types: [opened]
+    types: [opened, edited, closed, reopened]
+  issue_comment:
+    types: [created]
 
 jobs:
-  forward-issue:
+  sync:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Forward issue
-        uses: actions/github-script@v7
+      - uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.TANGO_PUBLIC_ISSUE_FORWARDER_PAT }}
           script: |
-            const title = context.payload.issue.title;
-            const body = context.payload.issue.body || "";
-            const url = context.payload.issue.html_url;
+            const event = context.eventName;
+            const issue = context.payload.issue;
 
-            await github.rest.issues.create({
-              owner: "makegov",
-              repo: "tango",
-              title: `[PUBLIC] ${title}`,
-              body: `Public issue: ${url}\n\n---\n\n${body}`
-            });
+            // step 1: find/create the mirrored private issue.
+            async function getPrivateIssueNumber() {
+              // look for a comment that mentions the private issue
+              const comments =
+                await github.rest.issues.listComments({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number
+                });
+
+              const marker = comments.data.find(c =>
+                c.body.includes("Mirrored as private issue #")
+              );
+
+              if (marker) {
+                return Number(marker.body.match(/#(\d+)/)[1]);
+              }
+
+              // Otherwise, create a new one
+              const created =
+                await github.rest.issues.create({
+                  owner: "makegov",
+                  repo: "tango",
+                  title: `[Public] ${issue.title}`,
+                  body: `Mirrored from: ${issue.html_url}\n\n${issue.body || ""}`
+                });
+
+              // save the link as a comment in the public issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Mirrored as private issue #${created.data.number}`
+              });
+
+              return created.data.number;
+            }
+
+            const privateIssueNumber = await getPrivateIssueNumber();
+
+            // step 2: react based on event type
+            if (event === "issues" && context.payload.action === "edited") {
+              await github.rest.issues.update({
+                owner: "makegov",
+                repo: "tango",
+                issue_number: privateIssueNumber,
+                title: `[Public] ${issue.title}`,
+                body: `Mirrored from: ${issue.html_url}\n\n${issue.body || ""}`
+              });
+            }
+
+            if (event === "issues" && context.payload.action === "closed") {
+              await github.rest.issues.update({
+                owner: "makegov",
+                repo: "tango",
+                issue_number: privateIssueNumber,
+                state: "closed"
+              });
+            }
+
+            if (event === "issues" && context.payload.action === "reopened") {
+              await github.rest.issues.update({
+                owner: "makegov",
+                repo: "tango",
+                issue_number: privateIssueNumber,
+                state: "open"
+              });
+            }
+
+            if (event === "issue_comment" && context.payload.action === "created") {
+              const comment = context.payload.comment;
+
+              await github.rest.issues.createComment({
+                owner: "makegov",
+                repo: "tango",
+                issue_number: privateIssueNumber,
+                body: `Public comment by @${comment.user.login}:\n\n${comment.body}`
+              });
+            }
