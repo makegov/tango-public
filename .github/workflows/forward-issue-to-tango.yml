@@ -1,3 +1,5 @@
+name: Sync Public Issues to Private Repo
+
 on:
   issues:
     types: [opened, edited, closed, reopened]
@@ -7,66 +9,88 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/github-script@v7
+      - name: Sync issue or comment
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.TANGO_PUBLIC_ISSUE_FORWARDER_PAT }}
           script: |
-            const event = context.eventName;
-            const issue = context.payload.issue;
+            const pub = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              number: context.payload.issue.number,
+              url: context.payload.issue.html_url,
+              title: context.payload.issue.title,
+              body: context.payload.issue.body || "",
+            };
 
-            // step 1: find/create the mirrored private issue.
+            const event = context.eventName;
+            const action = context.payload.action;
+
+            // Utility: find or create the matching private issue
             async function getPrivateIssueNumber() {
-              // look for a comment that mentions the private issue
-              const comments =
-                await github.rest.issues.listComments({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number
-                });
+              // Step 1: Look for a public comment linking to the private issue
+              const comments = await github.rest.issues.listComments({
+                owner: pub.owner,
+                repo: pub.repo,
+                issue_number: pub.number,
+              });
 
               const marker = comments.data.find(c =>
                 c.body.includes("Mirrored as private issue #")
               );
 
               if (marker) {
-                return Number(marker.body.match(/#(\d+)/)[1]);
+                const n = Number(marker.body.match(/#(\d+)/)[1]);
+                if (!isNaN(n)) return n;
               }
 
-              // Otherwise, create a new one
-              const created =
-                await github.rest.issues.create({
-                  owner: "makegov",
-                  repo: "tango",
-                  title: `[Public] ${issue.title}`,
-                  body: `Mirrored from: ${issue.html_url}\n\n${issue.body || ""}`
-                });
+              // Step 2: Not found → create new private issue
+              const created = await github.rest.issues.create({
+                owner: "makegov",
+                repo: "tango",
+                title: `[Public] ${pub.title}`,
+                body: `Mirrored from: ${pub.url}\n\n${pub.body}`
+              });
 
-              // save the link as a comment in the public issue
+              // Step 3: Add a comment on the public issue establishing the link
               await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
+                owner: pub.owner,
+                repo: pub.repo,
+                issue_number: pub.number,
                 body: `Mirrored as private issue #${created.data.number}`
               });
 
               return created.data.number;
             }
 
+            // Prevent looping if someone somehow mirrors back into public
+            if (pub.title.startsWith("[Public]")) {
+              console.log("Skipping: private issue event triggered the workflow.");
+              return;
+            }
+
             const privateIssueNumber = await getPrivateIssueNumber();
 
-            // step 2: react based on event type
-            if (event === "issues" && context.payload.action === "edited") {
+            //
+            // ISSUE UPDATES
+            //
+            if (event === "issues" && action === "edited") {
+              console.log("Updating private issue fields…");
+
               await github.rest.issues.update({
                 owner: "makegov",
                 repo: "tango",
                 issue_number: privateIssueNumber,
-                title: `[Public] ${issue.title}`,
-                body: `Mirrored from: ${issue.html_url}\n\n${issue.body || ""}`
+                title: `[Public] ${pub.title}`,
+                body: `Mirrored from: ${pub.url}\n\n${pub.body}`
               });
             }
 
-            if (event === "issues" && context.payload.action === "closed") {
+            if (event === "issues" && action === "closed") {
+              console.log("Closing private issue…");
+
               await github.rest.issues.update({
                 owner: "makegov",
                 repo: "tango",
@@ -75,7 +99,9 @@ jobs:
               });
             }
 
-            if (event === "issues" && context.payload.action === "reopened") {
+            if (event === "issues" && action === "reopened") {
+              console.log("Reopening private issue…");
+
               await github.rest.issues.update({
                 owner: "makegov",
                 repo: "tango",
@@ -84,13 +110,24 @@ jobs:
               });
             }
 
-            if (event === "issue_comment" && context.payload.action === "created") {
-              const comment = context.payload.comment;
+            //
+            // COMMENTS
+            //
+            if (event === "issue_comment" && action === "created") {
+              const c = context.payload.comment;
+
+              // Skip bot/self comments to avoid recursion
+              if (c.user.type === "Bot") {
+                console.log("Skipping bot comment…");
+                return;
+              }
+
+              console.log("Mirroring public comment…");
 
               await github.rest.issues.createComment({
                 owner: "makegov",
                 repo: "tango",
                 issue_number: privateIssueNumber,
-                body: `Public comment by @${comment.user.login}:\n\n${comment.body}`
+                body: `Public comment by @${c.user.login}:\n\n${c.body}`
               });
             }
