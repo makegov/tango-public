@@ -27,26 +27,52 @@ jobs:
 
             const event = context.eventName;
             const action = context.payload.action;
+            const markerRegex = /Mirrored as private issue #(\d+)/;
+
+            // Walk all public comments to find the already-linked private issue
+            async function findPrivateIssueFromPublicComments() {
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                {
+                  owner: pub.owner,
+                  repo: pub.repo,
+                  issue_number: pub.number,
+                  per_page: 100,
+                }
+              );
+
+              for (const comment of comments) {
+                const match = comment.body.match(markerRegex);
+                if (!match) continue;
+
+                const n = Number(match[1]);
+                if (!isNaN(n)) return n;
+              }
+
+              return null;
+            }
+
+            // Fallback: search the private repo for a mirrored URL in the body
+            async function findPrivateIssueBySearch() {
+              const search = await github.rest.search.issuesAndPullRequests({
+                q: `repo:makegov/tango "${pub.url}" in:body is:issue`,
+              });
+
+              const hit = search.data.items?.[0];
+              return hit ? hit.number : null;
+            }
 
             // Utility: find or create the matching private issue
             async function getPrivateIssueNumber() {
               // Step 1: Look for a public comment linking to the private issue
-              const comments = await github.rest.issues.listComments({
-                owner: pub.owner,
-                repo: pub.repo,
-                issue_number: pub.number,
-              });
+              const fromComments = await findPrivateIssueFromPublicComments();
+              if (fromComments) return fromComments;
 
-              const marker = comments.data.find(c =>
-                c.body.includes("Mirrored as private issue #")
-              );
+              // Step 2: Fallback search in private repo (covers deleted markers)
+              const fromSearch = await findPrivateIssueBySearch();
+              if (fromSearch) return fromSearch;
 
-              if (marker) {
-                const n = Number(marker.body.match(/#(\d+)/)[1]);
-                if (!isNaN(n)) return n;
-              }
-
-              // Step 2: Not found → create new private issue
+              // Step 3: Not found → create new private issue
               const created = await github.rest.issues.create({
                 owner: "makegov",
                 repo: "tango",
@@ -54,7 +80,7 @@ jobs:
                 body: `Mirrored from: ${pub.url}\n\n${pub.body}`
               });
 
-              // Step 3: Add a comment on the public issue establishing the link
+              // Step 4: Add a comment on the public issue establishing the link
               await github.rest.issues.createComment({
                 owner: pub.owner,
                 repo: pub.repo,
